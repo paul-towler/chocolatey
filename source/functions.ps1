@@ -1,6 +1,3 @@
-#Requires -Version 5.1
-#Requires -RunAsAdministrator
-
 # Function to get the package version from remote or local repository
 function Get-RemotePackage
 {
@@ -26,9 +23,48 @@ function Get-RemotePackage
     }
     catch
     {
+        throw " Failed to get package information for '$Package'. Error: $_"
+    }
+}
+
+function Install-ChocoPackage
+{
+    param
+    (   
+        [Parameter(Mandatory = $true, HelpMessage="Name of the Chocolatey package")]
+        [string]$Package
+    )
+
+    try
+    {
+        if (Get-RemotePackage -Package $Package -Local)
+        {
+            Write-Host "'$Package' is already installed." -ForegroundColor Magenta
+            return $true
+        }
+        else
+        {
+            Write-Host " Installing package '$Package'....." -ForegroundColor Yellow
+            $null = choco install $Package --limit-output --no-progress --nocolor --yes
+            $exitCode = $LASTEXITCODE # Capture the exit code of the choco install command
+
+            if ($exitCode -eq 0)
+            {
+                Write-Host " SUCCESS! '$Package' is installed." -ForegroundColor Green
+                return $true
+            }
+            else
+            {
+                throw " Failed to install package '$Package'. Exit code: $exitCode"
+            }
+        }
+    }
+    catch
+    {
         Write-Host " Failed to get package information for '$Package'. Error: $_" -ForegroundColor Red
     }
 }
+
 
 # Function to split the version string into components
 function Split-Version
@@ -50,7 +86,7 @@ function Split-Version
     }
     else
     {
-        Write-Host " Invalid version format: $Version" -ForegroundColor Red
+        throw " Invalid version format: $Version"
     }
 }
 
@@ -100,54 +136,4 @@ function Test-Versions
     }
 
     return $upgradeRequired
-}
-
-# Main script to check and upgrade packages
-Write-Host " Check choco Packages for Upgrades." -ForegroundColor Cyan
-$localPackages = choco list --local --limit-output
-
-foreach ($localPackage in $localPackages)
-{
-    $package = $localPackage.split("|")[0] # Extract package name
-    $localVersion = $localPackage.split("|")[1] # Extract local version
-    $remoteVersion = Get-RemotePackage -Package $package -Remote # Get remote version
-
-    $localVersionParts = Split-Version -Version $localVersion # Split local version into components
-    $remoteVersionParts = Split-Version -Version $remoteVersion # Split remote version into components
-
-    Write-Host "`r`n Checking Package '$($package)'....." -ForegroundColor Gray
-    Write-Host " Local Version is: $($localVersion)" -ForegroundColor White
-    Write-Host " Remote Version is: $($remoteVersion)" -ForegroundColor White
-
-    # Check if upgrade is required
-    $upgradeRequired = Test-Versions -Local $localVersionParts -Remote $remoteVersionParts -Package $package
-
-    try
-    {
-        Switch ($upgradeRequired)
-        {
-            $true
-            {
-                Write-Host " Upgrading '$($package)' to '$($remoteVersion)'....." -ForegroundColor Yellow
-                $null = choco upgrade $package --version $remoteVersion --limit-output --no-progress --nocolor --yes
-                $exitCode = $LASTEXITCODE # Capture the exit code of the choco upgrade command
-
-                if ($exitCode -eq 0)
-                {
-                    $newLocalVersion = Get-RemotePackage -Package $package -Local # Get the new local version after upgrade
-                    Write-Host " SUCCESS! '$($package)' is upgraded to version '$($newLocalVersion)'" -ForegroundColor Green
-                }
-                else
-                {
-                    Write-Host " Failed to upgrade package '$package'. Exit code: $exitCode" -ForegroundColor Red
-                }
-            }
-            default
-            { Write-Host " No Action required" -ForegroundColor Magenta }
-        }
-    }
-    catch
-    {
-        Write-Host " Failed to upgrade package '$package'. Error: $_" -ForegroundColor Red
-    }
 }
