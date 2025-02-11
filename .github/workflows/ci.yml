@@ -12,7 +12,7 @@ jobs:
       - name: Perform a Pester test from the command-line
         shell: pwsh
         run: Test-Path resultsfile.log | Should -Be $true
-      - name: Perform a Pester test from the Tests.ps1 file
+      - name: Perform a Pester test
         shell: pwsh
         run: |
           Invoke-Pester -Script tests/Test-SplitVersion.Tests.ps1 -Output Detailed
