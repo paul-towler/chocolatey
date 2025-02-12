@@ -1,6 +1,5 @@
-<# #Requires -Version 5.1
+#Requires -Version 5.1
 #Requires -RunAsAdministrator
- #>
 
 # Dot-source the functions file
 . "$PSScriptRoot/Functions.ps1"
