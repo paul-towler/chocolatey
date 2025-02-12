@@ -12,4 +12,4 @@ jobs:
       - name: Perform a Pester test
         shell: pwsh
         run: |
-          Invoke-Pester -Script tests/Test-ChocoUpgrade.Tests.ps1 -Output Detailed
+          Invoke-Pester -Script tests/Update-ChocoPackages.Tests.ps1 -Output Detailed

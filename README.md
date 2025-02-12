@@ -6,7 +6,6 @@ This PowerShell script checks for updates to installed Chocolatey packages and u
 
 - PowerShell 5.1 or later
 - Chocolatey
-- Administrator privileges
 
 ## Script Overview
 
@@ -50,9 +49,13 @@ Tests if an upgrade is required by comparing version components.
 
 ## Usage
 
-1. Open PowerShell with administrator privileges.
+1. Open PowerShell
 2. Run the script:
 
 ```powershell
-.\Test-ChocoUpgrade.ps1
+.\Update-ChocoPackages.ps1
 ```
+
+> **NOTE:**
+>
+> If you have installed packages with elevated admin privileges, you must run this script with administrator privileges.
