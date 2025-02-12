@@ -53,7 +53,7 @@ Tests if an upgrade is required by comparing version components.
 2. Run the script:
 
 ```powershell
-.\Test-ChocoUpgrade.ps1
+.\Update-ChocoPackages.ps1
 ```
 
 > **NOTE:**
